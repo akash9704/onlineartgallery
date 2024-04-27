@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <title>Orders</title>
+
+  <h1>Your Orders</h1>
+
+  <style>
+    .back-class {
+      background-color: #f5f5f5;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+    }
+
+    .card-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .card-img-top {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    h3 {
+      color: seagreen;
+      margin-top: 10px;
+    }
+
+    .total-price-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e0f7fa;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .total-price-label {
+      font-weight: bold;
+      color: #00796b;
+    }
+
+    .place-order-button {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block; /* Ensures the button takes the full width */
+      margin: 0 auto; /* Centers the button */
+    }
+
+    .cancel-order-button {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #e57373;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block; /* Ensures the button takes the full width */
+      margin: 0 auto; /* Centers the button */
+    }
+ </style>
+
+  {% for order, art in con %}
+    <div class="card card-layout back-class" id="order-card-{{ art.id }}">
+      <img class="card-img-top" src="{{ art.image.url }}" alt="{{ art.art_name }}">
+      <h3>Price: ${{ art.price }}</h3>
+      <h3>Date: {{ order.date }}</h3>
+
+      <!-- Cancel Order Button -->
+      <form action="{% url 'cancel_order' art.id %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="cancel-order-button">Cancel Order</button>
+      </form>
+    </div>
+  {% endfor %}
+
+  <div class="total-price-section">
+    <h3 class="total-price-label">Total Price: ${{ total_price }}</h3>
+  </div>
+
+  <!-- Razorpay Payment Form -->
+  <form id="razorpay-form" action="{% url 'initiate_payment' %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="amount" value="{{ total_price }}">
+    <!-- Add other necessary hidden fields here -->
+    <button id="confirm-order-button" class="place-order-button">Confirm Order</button>
+  </form>
+  <script>
+    document.getElementById('confirm-order-button').addEventListener('click', function() {
+      document.getElementById('razorpay-form').submit();
+    });
+  </script>
+{% endblock %}
